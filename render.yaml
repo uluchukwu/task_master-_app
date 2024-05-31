@@ -8,3 +8,7 @@ services:
     envVars:
       - key: FLASK_ENV
         value: production
+      - key: DATABASE_URL
+        value: sqlite:///test.db
+      - key: SECRET_KEY
+        value: your_secret_key

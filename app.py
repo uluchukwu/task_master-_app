@@ -1,9 +1,18 @@
+import os
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+
+# Configuring from environment variables
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///default.db')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret_key')
+
 db = SQLAlchemy(app)
 
 class Todo(db.Model):
@@ -34,7 +43,6 @@ def index():
 @app.route('/delete/<int:id>')
 def delete(id):
     task_to_delete = Todo.query.get_or_404(id)
-
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
@@ -45,15 +53,13 @@ def delete(id):
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
     task = Todo.query.get_or_404(id)
-    
     if request.method == 'POST':
         task.content = request.form['content']
-
         try:
             db.session.commit()
             return redirect('/')
         except:
-            return 'There was an issue updating your task'
+            return 'There was an Issue updating your task'
     else:
         return render_template('update.html', task=task)
 
